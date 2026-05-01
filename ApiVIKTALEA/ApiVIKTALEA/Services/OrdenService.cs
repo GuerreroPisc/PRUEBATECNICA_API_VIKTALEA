@@ -11,11 +11,13 @@ public class OrdenService : IOrdenService
 {
     private readonly AppDbContext _context;
     private readonly IHttpContextAccessor _httpContext;
+    private readonly IProductoService _productoService;
 
-    public OrdenService(AppDbContext context, IHttpContextAccessor httpContext)
+    public OrdenService(AppDbContext context, IHttpContextAccessor httpContext, IProductoService productoService)
     {
         _context = context;
         _httpContext = httpContext;
+        _productoService = productoService;
     }
 
     private string UsuarioActual =>
@@ -86,25 +88,19 @@ public class OrdenService : IOrdenService
 
         foreach (var item in dto.Items)
         {
-            var producto = await _context.Productos.FindAsync(item.ProductoId);
-            if (producto is null)
-                return (null, $"El producto con Id {item.ProductoId} no existe.");
-            if (!producto.Estado)
-                return (null, $"El producto '{producto.Nombre}' está inactivo y no puede agregarse a una orden.");
-            if (producto.Stock < item.Cantidad)
-                return (null, $"Stock insuficiente para '{producto.Nombre}'. Disponible: {producto.Stock}, solicitado: {item.Cantidad}.");
+            var (success, error, precio, _) = await _productoService.ValidarYDescontarStockAsync(item.ProductoId, item.Cantidad);
+            if (!success)
+                return (null, error);
 
             orden.Detalles.Add(new DetalleOrden
             {
                 ProductoId = item.ProductoId,
                 Cantidad = item.Cantidad,
-                PrecioUnitario = producto.Precio,
-                Subtotal = producto.Precio * item.Cantidad,
+                PrecioUnitario = precio,
+                Subtotal = precio * item.Cantidad,
                 UsuarioCreacion = usuario,
                 FechaCreacion = ahora
             });
-
-            producto.Stock -= item.Cantidad;
         }
 
         orden.Total = orden.Detalles.Sum(d => d.Subtotal);

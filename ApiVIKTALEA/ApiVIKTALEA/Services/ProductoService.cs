@@ -162,4 +162,20 @@ public class ProductoService : IProductoService
         await _context.SaveChangesAsync();
         return (true, null);
     }
+
+    // Valida disponibilidad y descuenta stock en memoria (sin SaveChanges).
+    // El llamador es responsable de persistir junto con su propia operación.
+    public async Task<(bool success, string? error, decimal precio, string nombre)> ValidarYDescontarStockAsync(int productoId, int cantidad)
+    {
+        var producto = await _context.Productos.FindAsync(productoId);
+        if (producto is null)
+            return (false, $"El producto con Id {productoId} no existe.", 0, string.Empty);
+        if (!producto.Estado)
+            return (false, $"El producto '{producto.Nombre}' está inactivo y no puede agregarse a una orden.", 0, string.Empty);
+        if (producto.Stock < cantidad)
+            return (false, $"Stock insuficiente para '{producto.Nombre}'. Disponible: {producto.Stock}, solicitado: {cantidad}.", 0, string.Empty);
+
+        producto.Stock -= cantidad;
+        return (true, null, producto.Precio, producto.Nombre);
+    }
 }
