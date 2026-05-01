@@ -1,0 +1,6 @@
+@ApiVIKTALEA_HostAddress = http://localhost:5123
+
+GET {{ApiVIKTALEA_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
