@@ -10,5 +10,6 @@ public interface IProductoService
     Task<(ProductoDto? producto, string? error)> CreateAsync(CreateProductoDto dto);
     Task<(ProductoDto? producto, string? error)> UpdateAsync(int id, UpdateProductoDto dto);
     Task<(bool success, string? error)> DeactivateAsync(int id);
+    Task<(bool success, string? error)> ActivateAsync(int id);
     Task<(bool success, string? error, decimal precio, string nombre)> ValidarYDescontarStockAsync(int productoId, int cantidad);
 }

@@ -81,4 +81,20 @@ public class CategoriaService : ICategoriaService
         await _context.SaveChangesAsync();
         return (true, null);
     }
+
+    public async Task<(bool success, string? error)> ActivateAsync(int id)
+    {
+        var categoria = await _context.Categorias.FindAsync(id);
+        if (categoria is null)
+            return (false, "Categoría no encontrada.");
+        if (categoria.Estado)
+            return (false, "La categoría ya está activa.");
+
+        categoria.Estado = true;
+        categoria.UsuarioModificacion = UsuarioActual;
+        categoria.FechaModificacion = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+        return (true, null);
+    }
 }

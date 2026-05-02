@@ -9,4 +9,5 @@ public interface ICategoriaService
     Task<CategoriaDto> CreateAsync(CreateCategoriaDto dto);
     Task<CategoriaDto?> UpdateAsync(int id, UpdateCategoriaDto dto);
     Task<(bool success, string? error)> DeactivateAsync(int id);
+    Task<(bool success, string? error)> ActivateAsync(int id);
 }

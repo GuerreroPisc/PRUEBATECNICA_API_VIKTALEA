@@ -57,7 +57,21 @@ public class CategoriasController : ControllerBase
     {
         var (success, error) = await _service.DeactivateAsync(id);
         if (!success)
-            return BadRequest(new { message = error });
+            return error == "Categoría no encontrada."
+                ? NotFound(new { message = error })
+                : BadRequest(new { message = error });
+        return NoContent();
+    }
+
+    [HttpPatch("{id:int}/activar")]
+    [Authorize(Roles = "Administrador")]
+    public async Task<IActionResult> Activate(int id)
+    {
+        var (success, error) = await _service.ActivateAsync(id);
+        if (!success)
+            return error == "Categoría no encontrada."
+                ? NotFound(new { message = error })
+                : BadRequest(new { message = error });
         return NoContent();
     }
 }

@@ -178,4 +178,20 @@ public class ProductoService : IProductoService
         producto.Stock -= cantidad;
         return (true, null, producto.Precio, producto.Nombre);
     }
+
+    public async Task<(bool success, string? error)> ActivateAsync(int id)
+    {
+        var producto = await _context.Productos.FindAsync(id);
+        if (producto is null)
+            return (false, "Producto no encontrado.");
+        if (producto.Estado)
+            return (false, "El producto ya está activo.");
+
+        producto.Estado = true;
+        producto.UsuarioModificacion = UsuarioActual;
+        producto.FechaModificacion = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+        return (true, null);
+    }
 }
